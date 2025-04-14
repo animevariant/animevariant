@@ -1,0 +1,17 @@
+
+
+> @repo/logger@0.0.0 build
+> bunchee
+
+[1G[0K[?25l[1G[1G[32m⠋[39m Building...
+
+[1G[0K[1A[0K[1A[0K[32m⠙[39m Building...
+
+[1G[0K[1A[0K[1A[0K[32m⠹[39m Building...
+
+[1G[0K[1A[0K[1A[0K[1G[?25h[4mExports[24m  [4mFile[24m                  [4mSize[24m
+.        [1mdist/es/index.js[22m      136 B
+         [1mdist/cjs/index.cjs[22m    203 B
+         [2mdist/es/index.d.ts[22m    66 B
+         [2mdist/cjs/index.d.cts[22m  66 B
+[?25h[1G[0K⠙[1G[0K

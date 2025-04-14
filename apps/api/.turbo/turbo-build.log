@@ -1,0 +1,15 @@
+
+
+> api@0.0.0 build
+> tsup
+
+[1G[0K[34mCLI[39m Building entry: src/index.ts
+[34mCLI[39m Using tsconfig: tsconfig.json
+[34mCLI[39m tsup v8.4.0
+[34mCLI[39m Using tsup config: /home/valiantlynx/projects/animevariant/tur/animevariant/apps/api/tsup.config.ts
+[34mCLI[39m Target: node16
+[34mCLI[39m Cleaning output folder
+[34mCJS[39m Build start
+[32mCJS[39m [1mdist/index.cjs [22m[32m2.04 KB[39m
+[32mCJS[39m ⚡️ Build success in 7ms
+[1G[0K⠙[1G[0K

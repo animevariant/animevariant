@@ -1,0 +1,16 @@
+
+
+> @repo/logger@0.0.0 lint
+> eslint src/
+
+[1G[0K[0m[0m
+[0m[4m/home/valiantlynx/projects/animevariant/tur/animevariant/packages/logger/src/__tests__/log.test.ts[24m[0m
+[0m  [2m9:5[22m  [33mwarning[39m  Unused eslint-disable directive (no problems were reported from 'no-console')[0m
+[0m[0m
+[0m[4m/home/valiantlynx/projects/animevariant/tur/animevariant/packages/logger/src/index.ts[24m[0m
+[0m  [2m2:3[22m  [33mwarning[39m  Unused eslint-disable directive (no problems were reported from 'no-console')[0m
+[0m[0m
+[0m[33m[1m✖ 2 problems (0 errors, 2 warnings)[22m[39m[0m
+[0m[33m[1m[22m[39m[33m[1m  0 errors and 2 warnings potentially fixable with the `--fix` option.[22m[39m[0m
+[0m[33m[1m[22m[39m[0m
+[1G[0K⠙[1G[0K

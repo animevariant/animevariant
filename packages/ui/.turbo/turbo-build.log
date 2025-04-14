@@ -1,0 +1,21 @@
+
+
+> @repo/ui@0.0.0 build
+> bunchee
+
+[1G[0K[?25l[1G[1G[32m⠋[39m Building...
+
+[1G[0K[1A[0K[1A[0K[32m⠙[39m Building...
+
+[1G[0K[1A[0K[1A[0K[32m⠹[39m Building...
+
+[1G[0K[1A[0K[1A[0K[1G[?25h[4mExports[24m           [4mFile[24m                          [4mSize[24m
+./link            [1mdist/es/link.mjs[22m              544 B
+                  [1mdist/cjs/link.js[22m              583 B
+                  [2mdist/cjs/link.d.ts[22m            372 B
+                  [2mdist/es/link.d.mts[22m            372 B
+./counter-button  [1mdist/cjs/counter-button.js[22m    1.92 kB
+                  [1mdist/es/counter-button.mjs[22m    1.78 kB
+                  [2mdist/es/counter-button.d.mts[22m  149 B
+                  [2mdist/cjs/counter-button.d.ts[22m  149 B
+[?25h[1G[0K⠙[1G[0K
