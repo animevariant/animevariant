@@ -1,0 +1,56 @@
+services:
+  # Development service
+  svelte-manga-api-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    ports:
+      - 8001:8001
+      - 5678:5678
+    volumes:
+      - .:/workspace:cached
+    command: sh -c "uvicorn src.main:app --host=0.0.0.0 --port=8001 --reload"
+    restart: always
+    tty: true
+    networks:
+      - svelte-manga-api
+    # depends_on:
+    #   - chroma
+    profiles:
+      - dev
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: ${GPU_COUNT:-0}
+    #           capabilities: [gpu]
+
+  # Production service
+  svelte-manga-api-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    ports:
+      - 8000:8000
+    restart: always
+    tty: true
+    networks:
+      - svelte-manga-api
+    # depends_on:
+    #   - chroma
+    profiles:
+      - prod
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: ${GPU_COUNT:-0}
+    #           capabilities: [gpu]
+
+networks:
+  svelte-manga-api:
+    driver: bridge
