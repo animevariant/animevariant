@@ -24,3 +24,16 @@ dist/
 .netlify
 
 src/animevariant_frontend/assets/mangas
+
+.DS_Store
+node_modules
+.turbo
+*.log
+.next
+dist
+dist-ssr
+*.local
+.env
+.cache
+server/dist
+public/dist
