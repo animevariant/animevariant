@@ -1,5 +1,5 @@
 # Base image for both environments
-FROM python:3.12-slim AS base
+FROM python:3.13-slim AS base
 
 RUN apt-get update && apt-get install -y \
     python3 \
