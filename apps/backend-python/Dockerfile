@@ -1,9 +1,27 @@
-# Base image for both environments
-FROM python:3.12-slim AS base
+# Stage 1: Install dependencies
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS deps
+WORKDIR /workspace
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
 
 RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy dependency definitions first (for better caching)
+COPY pyproject.toml uv.lock* ./
+
+# Install only the dependencies
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project --no-dev
+
+# Stage 2: Base image for both environments
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS base
+WORKDIR /workspace
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
+
+RUN apt-get update && apt-get install -y \
     python3-dev \
     build-essential \
     portaudio19-dev \
@@ -17,19 +35,28 @@ RUN apt-get update && apt-get install -y \
     sudo \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /workspace 
+# Copy the dependencies from the previous stage
+COPY --from=deps /workspace/.venv/ /workspace/.venv/
 
-COPY ./requirements.txt ./
-RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+# Copy application code
 COPY . .
+
+# Copy dependency files
+COPY pyproject.toml uv.lock* ./
+
+# Install the project (dependencies are already installed)
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
+
 # Set environment variables
 ENV MANGANELO="https://ww8.manganelo.tv"
 ENV CHAPMANGANELO="https://chapmanganelo.com"
 ENV MANGACLASH="https://mangaclash.com"
 ENV MANGAPARK="https://mangapark.net"
-
 ENV MANGANELO_CDN="https://cm.blazefast.co"
+
+# Set the path to include the virtual environment
+ENV PATH="/workspace/.venv/bin:$PATH"
 
 # Development-specific stage
 FROM base AS dev
