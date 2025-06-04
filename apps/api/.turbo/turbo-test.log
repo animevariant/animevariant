@@ -1,41 +1,0 @@
-
-
-> api@0.0.0 test
-> jest --detectOpenHandles
-
-[1G[0K[1m[2mDetermining test suites to run...[22m[22m[999D[K
-[K[1A
-[0m[7m[33m[1m RUNS [22m[39m[27m[0m [2msrc/__tests__/[22m[1mserver.test.ts[22m
-[K[1A[K[1A
-[0m[7m[33m[1m RUNS [22m[39m[27m[0m [2msrc/__tests__/[22m[1mserver.test.ts[22m
-[K[1A[K[1A[0mGET /status [32m200[0m 1.536 ms - 11[0m
-
-[0m[7m[33m[1m RUNS [22m[39m[27m[0m [2msrc/__tests__/[22m[1mserver.test.ts[22m
-[K[1A[K[1A
-[0m[7m[33m[1m RUNS [22m[39m[27m[0m [2msrc/__tests__/[22m[1mserver.test.ts[22m
-[K[1A[K[1A[0mGET /message/jared [32m200[0m 0.529 ms - 25[0m
-
-[0m[7m[33m[1m RUNS [22m[39m[27m[0m [2msrc/__tests__/[22m[1mserver.test.ts[22m
-[K[1A[K[1A
-[0m[7m[33m[1m RUNS [22m[39m[27m[0m [2msrc/__tests__/[22m[1mserver.test.ts[22m
-[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/__tests__/[22m[1mserver.test.ts[22m
-
-[0m[7m[33m[1m RUNS [22m[39m[27m[0m [2msrc/__tests__/[22m[1mserver.test.ts[22m
-[K[1A[K[1A  Server
-
-[0m[7m[33m[1m RUNS [22m[39m[27m[0m [2msrc/__tests__/[22m[1mserver.test.ts[22m
-[K[1A[K[1A    [32m✓[39m [2mhealth check returns 200 (90 ms)[22m
-
-[0m[7m[33m[1m RUNS [22m[39m[27m[0m [2msrc/__tests__/[22m[1mserver.test.ts[22m
-[K[1A[K[1A    [32m✓[39m [2mmessage endpoint says hello (10 ms)[22m
-
-[0m[7m[33m[1m RUNS [22m[39m[27m[0m [2msrc/__tests__/[22m[1mserver.test.ts[22m
-[K[1A[K[1A
-
-[0m[7m[33m[1m RUNS [22m[39m[27m[0m [2msrc/__tests__/[22m[1mserver.test.ts[22m
-[K[1A[K[1A[999D[K[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
-[1mTests:       [22m[1m[32m2 passed[39m[22m, 2 total
-[1mSnapshots:   [22m0 total
-[1mTime:[22m        0.565 s
-[2mRan all test suites[22m[2m.[22m
-[1G[0K⠙[1G[0K
