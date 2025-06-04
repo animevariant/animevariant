@@ -16,13 +16,16 @@ import os
 import logging
 from pydantic import BaseModel
 from bs4 import BeautifulSoup
-
+from bs4 import BeautifulSoup
+# routes for the API
+from .routers import (router_home)
 
 load_dotenv()
 
 app = FastAPI()
-
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "https://manga.valiantlynx.com").split(",")
+app.include_router(router_home.router)
+allowed_origins = os.getenv(
+    "ALLOWED_ORIGINS", "https://manga.valiantlynx.com").split(",")
 print("ALLOWED_ORIGINS:",  allowed_origins)
 app.add_middleware(
     CORSMiddleware,
@@ -87,6 +90,7 @@ anime_server_map = {
     }
 }
 
+
 @app.get("/api/anime")
 async def get_anime(server: str = Query(default='ANITAKU'), genre: Optional[str] = None, page: Optional[int] = None):
     try:
@@ -96,10 +100,12 @@ async def get_anime(server: str = Query(default='ANITAKU'), genre: Optional[str]
         base_url = os.getenv(server)
         scraper_class = anime_server_map[server]["scraper"]
         scraper = scraper_class(base_url)
-        animes = await scraper.get_popular(page)  # Use get_popular, adjust method as needed
+        # Use get_popular, adjust method as needed
+        animes = await scraper.get_popular(page)
         return {"results": animes}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/anime/{anime_id}")
 async def get_anime_details(server: str = Query(default='ANITAKU'), anime_id: str = Path(..., example="anime-xyz123")):
@@ -110,10 +116,11 @@ async def get_anime_details(server: str = Query(default='ANITAKU'), anime_id: st
         base_url = os.getenv(server)
         scraper_class = anime_server_map[server]["scraper"]
         scraper = scraper_class(base_url)
-        anime_details = await  scraper.get_details(anime_id)  # Use get_details
+        anime_details = await scraper.get_details(anime_id)  # Use get_details
         return anime_details
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/anime/{anime_id}/{episode_id}")
 async def get_anime_episode_details(anime_id: str = Path(..., example="anime-xyz123"), episode_id: str = Path(..., example="episode-1"), server: str = Query(default='ANITAKU')):
@@ -124,10 +131,12 @@ async def get_anime_episode_details(anime_id: str = Path(..., example="anime-xyz
         base_url = os.getenv(server)
         scraper_class = anime_server_map[server]["scraper"]
         scraper = scraper_class(base_url)
-        episode_details = await scraper.get_watching_links(anime_id, int(episode_id))  # Adjust method if needed
+        # Adjust method if needed
+        episode_details = await scraper.get_watching_links(anime_id, int(episode_id))
         return JSONResponse(content=episode_details)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/search/anime")
 async def search_anime(word: str = Query(..., example="naruto"), page: Optional[int] = 1, server: str = Query(default='ANITAKU')):
@@ -143,6 +152,7 @@ async def search_anime(word: str = Query(..., example="naruto"), page: Optional[
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/api/animeimage/{image}")
 async def get_anime_image_from_path(server: str = Query(default='ANITAKU'), image: str = Path(..., example="anime-xyz123.jpg")):
     try:
@@ -151,7 +161,8 @@ async def get_anime_image_from_path(server: str = Query(default='ANITAKU'), imag
 
         image_base_urls = anime_server_map[server]["image_base_urls"]
         if not image_base_urls:
-            raise HTTPException(status_code=404, detail=f"Image base URL not configured for server {server}")
+            raise HTTPException(
+                status_code=404, detail=f"Image base URL not configured for server {server}")
 
         image_urls = [
             f"{base_url}/animeimage/{image}" for base_url in image_base_urls if base_url]
@@ -159,11 +170,15 @@ async def get_anime_image_from_path(server: str = Query(default='ANITAKU'), imag
         response = await fetch_image(image_urls)
         return StreamingResponse(response.iter_bytes(), media_type=response.headers["Content-Type"])
     except httpx.HTTPStatusError as exc:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch image: {str(exc)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fetch image: {str(exc)}")
     except httpx.RequestError as exc:
-        raise HTTPException(status_code=500, detail=f"Request error: {str(exc)}")
+        raise HTTPException(
+            status_code=500, detail=f"Request error: {str(exc)}")
 
 # Helper function to fetch image
+
+
 async def fetch_image(image_urls: List[str]):
     async with httpx.AsyncClient() as client:
         for url in image_urls:
@@ -171,19 +186,21 @@ async def fetch_image(image_urls: List[str]):
             if response.status_code == 200:
                 return response
         raise HTTPException(status_code=404, detail="Image not found")
-    
-    
-    
-##################### Old direct translation from express js #######################3
+
+
+# Old direct translation from express js #######################3
 
 base_url = "https://anitaku.to/"
 
 # Model Definitions
+
+
 class Anime(BaseModel):
     title: str
     id: str
     image: str
     episode_number: Union[str, None] = None
+
 
 class AnimeDetails(BaseModel):
     title: str
@@ -196,19 +213,24 @@ class AnimeDetails(BaseModel):
     totalepisode: str
     Othername: str
 
+
 class SearchResult(BaseModel):
     title: str
     id: str
     image: str
 
+
 class WatchingLink(BaseModel):
     src: str
     size: str
+
 
 class GenreList(BaseModel):
     list: List[str]
 
 # Helper function to fetch HTML content
+
+
 async def fetch_html(url: str) -> str:
     async with httpx.AsyncClient() as client:
         response = await client.get(url, follow_redirects=True)
@@ -217,6 +239,7 @@ async def fetch_html(url: str) -> str:
             print(f"Redirected to {redirect_url}")
         response.raise_for_status()
         return response.text
+
 
 @app.get("/api/home")
 async def get_home():
@@ -233,6 +256,7 @@ async def get_home():
     }
     return info
 
+
 @app.get("/api/docs")
 async def get_docs():
     response = {
@@ -242,44 +266,56 @@ async def get_docs():
             "author": "Valiantlynx",
             "description": "An API for accessing anime information and resources.",
             "endpoints": [
-                {"path": "/api/home", "description": "Get information about available API endpoints.", "params": {}},
-                {"path": "/api/popular/:page", "description": "Get a list of popular anime.", "params": {"page": "an integer representing the page number"}},
-                {"path": "/api/details/:id", "description": "Get details of a specific anime by ID.", "params": {"id": "The correct name of the anime"}},
-                {"path": "/api/search/:word/:page", "description": "Search for anime by a keyword.", "params": {"word": "The keyword to search for", "page": "an integer representing the page number"}},
-                {"path": "/api/watching/:id/:episode", "description": "Get the video links for a specific episode of an anime.", "params": {"id": "The correct name of the anime", "episode": "an integer representing the episode number"}},
-                {"path": "/api/genre/:type/:page", "description": "Get a list of anime by genre.", "params": {"type": "The genre of the anime", "page": "an integer representing the page number"}},
-                {"path": "/api/recentlyadded/:page", "description": "Get a list of recently added anime.", "params": {"page": "an integer representing the page number"}},
-                {"path": "/api/list/:variable/:page", "description": "Get a list of anime based on a variable.", "params": {"variable": "The variable to filter the list", "page": "an integer representing the page number"}},
-                {"path": "/api/genrelist", "description": "Get a list of available anime genres.", "params": {}}
+                {"path": "/api/home",
+                    "description": "Get information about available API endpoints.", "params": {}},
+                {"path": "/api/popular/:page", "description": "Get a list of popular anime.",
+                    "params": {"page": "an integer representing the page number"}},
+                {"path": "/api/details/:id", "description": "Get details of a specific anime by ID.",
+                    "params": {"id": "The correct name of the anime"}},
+                {"path": "/api/search/:word/:page", "description": "Search for anime by a keyword.", "params": {
+                    "word": "The keyword to search for", "page": "an integer representing the page number"}},
+                {"path": "/api/watching/:id/:episode", "description": "Get the video links for a specific episode of an anime.",
+                    "params": {"id": "The correct name of the anime", "episode": "an integer representing the episode number"}},
+                {"path": "/api/genre/:type/:page", "description": "Get a list of anime by genre.",
+                    "params": {"type": "The genre of the anime", "page": "an integer representing the page number"}},
+                {"path": "/api/recentlyadded/:page", "description": "Get a list of recently added anime.",
+                    "params": {"page": "an integer representing the page number"}},
+                {"path": "/api/list/:variable/:page", "description": "Get a list of anime based on a variable.",
+                    "params": {"variable": "The variable to filter the list", "page": "an integer representing the page number"}},
+                {"path": "/api/genrelist",
+                    "description": "Get a list of available anime genres.", "params": {}}
             ]
         }
     }
     return response
 
+
 @app.get("/api/popular/{page}", response_model=Dict[str, List[Anime]])
 async def get_popular(page: int):
     if page < 1:
-        raise HTTPException(status_code=400, detail="Page must be a positive integer")
-    
+        raise HTTPException(
+            status_code=400, detail="Page must be a positive integer")
+
     url = f"{base_url}popular.html?page={page}"
     html = await fetch_html(url)
     soup = BeautifulSoup(html, 'html.parser')
-    
+
     results = []
     for anime_item in soup.select(".img"):
         title = anime_item.select_one("a")["title"]
         id = anime_item.select_one("a")["href"].split('/')[-1]
         image = anime_item.select_one("img")["src"]
         results.append({"title": title, "id": id, "image": image})
-    
+
     return {"results": results}
+
 
 @app.get("/api/details/{id}", response_model=AnimeDetails)
 async def get_details(id: str):
     url = f"{base_url}category/{id}"
     html = await fetch_html(url)
     soup = BeautifulSoup(html, 'html.parser')
-    
+
     type = summary = relased = status = genres = Othername = ""
     title = soup.select_one(".anime_info_body_bg h1").text
     image = soup.select_one(".anime_info_body_bg img")["src"]
@@ -299,7 +335,7 @@ async def get_details(id: str):
             genres = text[8:].replace(", ", ",")
         elif span_text == "Other name: ":
             Othername = text[12:]
-            
+
     totalepisode = soup.select_one("#episode_page li:last-child a")["ep_end"]
 
     results = []
@@ -316,132 +352,148 @@ async def get_details(id: str):
     })
     return JSONResponse(content={"results": results})
 
+
 @app.get("/api/search/{word}/{page}", response_model=Dict[str, List[SearchResult]])
 async def search(word: str, page: int):
     if page < 1:
-        raise HTTPException(status_code=400, detail="Page must be a positive integer")
-    
+        raise HTTPException(
+            status_code=400, detail="Page must be a positive integer")
+
     url = f"{base_url}/search.html?keyword={word}&page={page}"
     html = await fetch_html(url)
     soup = BeautifulSoup(html, 'html.parser')
-    
+
     results = []
     for anime_item in soup.select(".img"):
         title = anime_item.select_one("a")["title"]
         id = anime_item.select_one("a")["href"].split('/')[-1]
         image = anime_item.select_one("img")["src"]
         results.append({"title": title, "id": id, "image": image})
-    
+
     return {"results": results}
+
 
 @app.get("/api/watching/{id}/{episode}")
 async def get_watching(id: str, episode: int):
     url = f"{base_url}{id}-episode-{episode}"
     html = await fetch_html(url)
     soup = BeautifulSoup(html, 'html.parser')
-    
+
     if soup.select_one(".entry-title") and soup.select_one(".entry-title").text == "404":
         return {"links": [], "link": "", "totalepisode": ""}
-    
+
     try:
-        totalepisode = soup.select_one("#episode_page li:last-child a").text.split("-")[-1]
-        link = soup.select_one("li.anime a")["data-video"].replace("streaming.php", "download")
-        
+        totalepisode = soup.select_one(
+            "#episode_page li:last-child a").text.split("-")[-1]
+        link = soup.select_one("li.anime a")[
+            "data-video"].replace("streaming.php", "download")
+
         response = await fetch_html(link)
         soup = BeautifulSoup(response, 'html.parser')
-        
+
         links = []
         for a in soup.select("a"):
             if a.get("download") == "":
                 size = a.text.strip().replace("(", "").replace(")", "").replace(" - mp4", "")
                 links.append({"src": a["href"], "size": size})
-        
+
         return {"links": links, "link": link, "totalepisode": totalepisode}
-    
+
     except Exception as e:
         print(f"Error: {e}")
         return {"links": [], "link": "", "totalepisode": ""}
-    
+
+
 @app.get("/api/genre/{type}/{page}", response_model=Dict[str, List[Anime]])
 async def get_genre(type: str, page: int):
     if page < 1:
-        raise HTTPException(status_code=400, detail="Page must be a positive integer")
-    
+        raise HTTPException(
+            status_code=400, detail="Page must be a positive integer")
+
     url = f"{base_url}genre/{type}?page={page}"
     html = await fetch_html(url)
     soup = BeautifulSoup(html, 'html.parser')
-    
+
     results = []
     for anime_item in soup.select(".img"):
         title = anime_item.select_one("a")["title"]
         id = anime_item.select_one("a")["href"].split('/')[-1]
         image = anime_item.select_one("img")["src"]
         results.append({"title": title, "id": id, "image": image})
-    
+
     return {"results": results}
+
 
 @app.get("/api/recentlyadded/{page}", response_model=Dict[str, List[Anime]])
 async def get_recently_added(page: int):
     if page < 1:
-        raise HTTPException(status_code=400, detail="Page must be a positive integer")
-    
+        raise HTTPException(
+            status_code=400, detail="Page must be a positive integer")
+
     url = f"{base_url}?page={page}"
     html = await fetch_html(url)
     soup = BeautifulSoup(html, 'html.parser')
-    
+
     results = []
     for anime_item in soup.select(".img"):
         title = anime_item.select_one("a")["title"]
         id = anime_item.select_one("a")["href"].split('/')[-1]
         image = anime_item.select_one("img")["src"]
-        episode_number = anime_item.select_one("p.episode").text.strip().replace(" ", "-").lower().replace("episode-", "")
-        results.append({"title": title, "id": id, "image": image, "episode_number": episode_number})
-    
+        episode_number = anime_item.select_one("p.episode").text.strip().replace(
+            " ", "-").lower().replace("episode-", "")
+        results.append({"title": title, "id": id, "image": image,
+                       "episode_number": episode_number})
+
     return {"results": results}
+
 
 @app.get("/api/genrelist", response_model=GenreList)
 async def get_genre_list():
     url = base_url
     html = await fetch_html(url)
     soup = BeautifulSoup(html, 'html.parser')
-    
+
     genres = [li.text for li in soup.select("nav.genre ul li")]
     return {"list": genres}
+
 
 @app.get("/api/list/{variable}/{page}", response_model=Dict[str, List[Anime]])
 async def get_list(variable: str, page: int):
     if page < 1:
-        raise HTTPException(status_code=400, detail="Page must be a positive integer")
-    
+        raise HTTPException(
+            status_code=400, detail="Page must be a positive integer")
+
     url = f"{base_url}anime-list.html?page={page}"
     if variable != "all":
         url = f"{base_url}anime-list-{variable}?page={page}"
-    
+
     html = await fetch_html(url)
     soup = BeautifulSoup(html, 'html.parser')
-    
+
     results = []
     for anime_item in soup.select("ul.listing li"):
         title = anime_item.select_one("a").text
         id = anime_item.select_one("a")["href"].split('/')[-1]
         results.append({"title": title, "id": id})
-    
+
     return JSONResponse(content={"list": results})
 
 
 BASE_URL = "https://anitaku.pe"
 AJAX_URL = "https://ajax.gogocdn.net/ajax"
 
+
 @app.get("/search/")
 async def search(query: str, page: int = 1):
     async with httpx.AsyncClient() as client:
         url = f"{BASE_URL}/filter.html?keyword={query}&page={page}"
         response = await client.get(url)
-    
+
     soup = BeautifulSoup(response.text, 'html.parser')
     results = []
-    has_next_page = bool(soup.select('div.anime_name.new_series > div > div > ul > li.selected').next())
-    
+    has_next_page = bool(soup.select(
+        'div.anime_name.new_series > div > div > ul > li.selected').next())
+
     for item in soup.select('div.last_episodes > ul > li'):
         results.append({
             'id': item.select_one('p.name > a').get('href').split('/')[2],
@@ -451,7 +503,7 @@ async def search(query: str, page: int = 1):
             'releaseDate': item.select_one('p.released').text.strip().replace('Released: ', ''),
             'subOrDub': 'DUB' if '(dub)' in item.select_one('p.name > a').text.lower() else 'SUB'
         })
-    
+
     return {"currentPage": page, "hasNextPage": has_next_page, "results": results}
 
 
@@ -460,7 +512,7 @@ async def fetch_anime_info(id: str):
     url = f"{BASE_URL}/category/{id}" if not id.startswith(BASE_URL) else id
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
-    
+
     soup = BeautifulSoup(response.text, 'html.parser')
     anime_info = {
         'id': id.split('/')[-1],
@@ -474,7 +526,8 @@ async def fetch_anime_info(id: str):
 
     episodes = []
     async with httpx.AsyncClient() as client:
-        episode_list_url = f"{AJAX_URL}/load-list-episode?ep_start=1&ep_end={anime_info['totalEpisodes']}&id={id}&alias="
+        episode_list_url = f"{
+            AJAX_URL}/load-list-episode?ep_start=1&ep_end={anime_info['totalEpisodes']}&id={id}&alias="
         episode_res = await client.get(episode_list_url)
     ep_soup = BeautifulSoup(episode_res.text, 'html.parser')
 
@@ -484,39 +537,41 @@ async def fetch_anime_info(id: str):
             'number': ep.select_one('div.name').text.replace('EP ', ''),
             'url': f"{BASE_URL}/{ep.select_one('a').get('href').strip()}"
         })
-    
+
     anime_info['episodes'] = episodes
     return anime_info
 
 
 @app.get("/episode/{episode_id}/sources/")
 async def fetch_episode_sources(episode_id: str, server: str = "GogoCDN"):
-    episode_url = f"{BASE_URL}/{episode_id}" if not episode_id.startswith("http") else episode_id
+    episode_url = f"{
+        BASE_URL}/{episode_id}" if not episode_id.startswith("http") else episode_id
     async with httpx.AsyncClient() as client:
         response = await client.get(episode_url)
-    
+
     soup = BeautifulSoup(response.text, 'html.parser')
-    
+
     iframe_src = soup.select_one('#load_anime > div > div > iframe').get('src')
     sources = []
-    
+
     if server == "GogoCDN":
         # Here you would extract sources from the GogoCDN extractor logic (implement separately)
         sources = ["source_from_gogo_cdn"]
-    
+
     download_link = soup.select_one('.dowloads > a').get('href')
     return {"sources": sources, "download": download_link}
 
 
 @app.get("/episode/{episode_id}/servers/")
 async def fetch_episode_servers(episode_id: str):
-    episode_url = f"{BASE_URL}/{episode_id}" if not episode_id.startswith(BASE_URL) else episode_id
+    episode_url = f"{
+        BASE_URL}/{episode_id}" if not episode_id.startswith(BASE_URL) else episode_id
     async with httpx.AsyncClient() as client:
         response = await client.get(episode_url)
-    
+
     soup = BeautifulSoup(response.text, 'html.parser')
     servers = []
-    
+
     for server in soup.select('div.anime_video_body > div.anime_muti_link > ul > li'):
         url = server.select_one('a').get('data-video')
         if not url.startswith('http'):
@@ -525,7 +580,7 @@ async def fetch_episode_servers(episode_id: str):
             'name': server.select_one('a').text.strip(),
             'url': url
         })
-    
+
     return servers
 
 
@@ -533,7 +588,7 @@ async def fetch_episode_servers(episode_id: str):
 async def fetch_recent_episodes(page: int = 1, type: int = 1):
     async with httpx.AsyncClient() as client:
         response = await client.get(f"{AJAX_URL}/page-recent-release.html?page={page}&type={type}")
-    
+
     soup = BeautifulSoup(response.text, 'html.parser')
     recent_episodes = []
 
@@ -546,8 +601,9 @@ async def fetch_recent_episodes(page: int = 1, type: int = 1):
             'image': item.select_one('div > a > img').get('src'),
             'url': f"{BASE_URL}{item.select_one('a').get('href')}"
         })
-    
-    has_next_page = not soup.select('div.anime_name_pagination.intro > div > ul > li').last().has_class('selected')
+
+    has_next_page = not soup.select(
+        'div.anime_name_pagination.intro > div > ul > li').last().has_class('selected')
     return {"currentPage": page, "hasNextPage": has_next_page, "results": recent_episodes}
 
 
@@ -569,7 +625,8 @@ async def fetch_genre_info(genre: str, page: int = 1):
             'url': f"{BASE_URL}/{item.select_one('p.name > a').get('href')}"
         })
 
-    has_next_page = not soup.select('div.anime_name_pagination > div > ul > li').last().has_class('selected')
+    has_next_page = not soup.select(
+        'div.anime_name_pagination > div > ul > li').last().has_class('selected')
     return {"currentPage": page, "hasNextPage": has_next_page, "results": genre_info}
 
 
@@ -590,7 +647,8 @@ async def fetch_top_airing(page: int = 1):
             'episodeNumber': item.select_one('p:nth-of-type(2) > a').text.replace('Episode ', '')
         })
 
-    has_next_page = not soup.select('div.anime_name.comedy > div > div > ul > li').last().has_class('selected')
+    has_next_page = not soup.select(
+        'div.anime_name.comedy > div > div > ul > li').last().has_class('selected')
     return {"currentPage": page, "hasNextPage": has_next_page, "results": top_airing}
 
 
@@ -611,19 +669,22 @@ async def fetch_recent_movies(page: int = 1):
             'url': f"{BASE_URL}{item.select_one('p.name > a').get('href')}"
         })
 
-    has_next_page = not soup.select('div.anime_name_pagination > div > ul > li').last().has_class('selected')
+    has_next_page = not soup.select(
+        'div.anime_name_pagination > div > ul > li').last().has_class('selected')
     return {"currentPage": page, "hasNextPage": has_next_page, "results": recent_movies}
 
 
 @app.get("/episode/{episode_id}/anime-id/")
 async def fetch_anime_id_from_episode_id(episode_id: str):
-    episode_url = f"{BASE_URL}/{episode_id}" if not episode_id.startswith(BASE_URL) else episode_id
+    episode_url = f"{
+        BASE_URL}/{episode_id}" if not episode_id.startswith(BASE_URL) else episode_id
     async with httpx.AsyncClient() as client:
         response = await client.get(episode_url)
-    
+
     soup = BeautifulSoup(response.text, 'html.parser')
-    anime_link = soup.select_one('div.anime_video_body > div.anime_muti_link > a').get('href')
-    
+    anime_link = soup.select_one(
+        'div.anime_video_body > div.anime_muti_link > a').get('href')
+
     anime_id = anime_link.split('/')[-2]
     return {"animeId": anime_id}
 
@@ -647,11 +708,12 @@ async def fetch_popular(page: int = 1):
 
     return {"results": popular_anime}
 
+
 @app.get("/genres/")
 async def fetch_genre_list():
     async with httpx.AsyncClient() as client:
         response = await client.get(BASE_URL)
-    
+
     soup = BeautifulSoup(response.text, 'html.parser')
     genre_list = []
 
@@ -666,13 +728,14 @@ async def fetch_genre_list():
 
 @app.get("/episode/{episode_id}/download/")
 async def fetch_direct_download_link(episode_id: str):
-    episode_url = f"{BASE_URL}/{episode_id}" if not episode_id.startswith(BASE_URL) else episode_id
+    episode_url = f"{
+        BASE_URL}/{episode_id}" if not episode_id.startswith(BASE_URL) else episode_id
     async with httpx.AsyncClient() as client:
         response = await client.get(episode_url)
-    
+
     soup = BeautifulSoup(response.text, 'html.parser')
     download_link = soup.select_one('.dowloads > a').get('href')
-    
+
     return {"download": download_link}
 
 
@@ -680,7 +743,7 @@ async def fetch_direct_download_link(episode_id: str):
 async def fetch_anime_list(page: int = 1):
     async with httpx.AsyncClient() as client:
         response = await client.get(f"{BASE_URL}/anime-list.html?page={page}")
-    
+
     soup = BeautifulSoup(response.text, 'html.parser')
     anime_list = []
 
@@ -694,8 +757,7 @@ async def fetch_anime_list(page: int = 1):
     return {"currentPage": page, "results": anime_list}
 
 
-
-############################## end ######################333
+# end ######################333
 
 @app.get("/")
 def read_root():
