@@ -1,0 +1,36 @@
+[project]
+name = "svelte-manga-api"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.13.4",
+    "debugpy>=1.8.14",
+    "fastapi>=0.115.12",
+    "httpx>=0.28.1",
+    "opencv-python>=4.11.0.86",
+    "prometheus-fastapi-instrumentator>=7.1.0",
+    "pydantic>=2.11.5",
+    "python-dotenv>=1.1.0",
+    "uvicorn>=0.34.3",
+]
+
+[dependency-groups]
+dev = [
+    "chromadb>=0.6.3",
+    "edge-tts>=7.0.2",
+    "faster-whisper>=1.1.1",
+    "lancedb>=0.22.1",
+    "langchain>=0.3.25",
+    "langchain-community>=0.3.24",
+    "langchain-core>=0.3.63",
+    "numpy>=2.2.6",
+    "ollama>=0.5.1",
+    "pandas>=2.2.3",
+    "pygame>=2.6.1",
+    "pytest>=8.4.0",
+    "scipy>=1.15.3",
+    "sentence-transformers>=4.1.0",
+    "unstructured>=0.17.2",
+]
