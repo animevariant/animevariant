@@ -2,6 +2,16 @@
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
   "tasks": {
+    "svelte-manga#dev": {
+      "dependsOn": ["anime-site-api#docker"]
+    },
+    "svelte-manga#preview": {
+      "dependsOn": ["anime-site-api#docker", "svelte-manga#build"]
+    },
+    "svelte-manga#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".svelte-kit/**"]
+    },
     "build": {
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "dependsOn": ["^build"],
@@ -19,7 +29,7 @@
       "dependsOn": []
     },
     "lint": {
-      "dependsOn": ["^build", "^lint"]
+      "dependsOn": ["^build", "^lint", "^format"]
     },
     "check-types": {
       "dependsOn": ["^build", "^check-types"]
