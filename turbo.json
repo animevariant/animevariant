@@ -3,18 +3,38 @@
   "ui": "tui",
   "tasks": {
     "svelte-manga#dev": {
-      "dependsOn": ["anime-site-api#docker"]
+      "dependsOn": [
+        "^svelte-manga-api#dev"
+      ],
+      "cache": false,
+      "persistent": true
+    },
+    "svelte-manga-api#dev": {
+      "cache": false,
+      "persistent": true
     },
     "svelte-manga#preview": {
-      "dependsOn": ["anime-site-api#docker", "svelte-manga#build"]
+      "dependsOn": [
+        "svelte-manga-api#dev",
+        "svelte-manga#build"
+      ]
     },
     "svelte-manga#build": {
-      "dependsOn": ["^build"],
-      "outputs": [".svelte-kit/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        ".svelte-kit/**"
+      ]
     },
     "build": {
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env*"
+      ],
+      "dependsOn": [
+        "^build"
+      ],
       "outputs": [
         "build/**",
         ".vercel/**",
@@ -25,17 +45,28 @@
       ]
     },
     "test": {
-      "outputs": ["coverage/**"],
+      "outputs": [
+        "coverage/**"
+      ],
       "dependsOn": []
     },
     "lint": {
-      "dependsOn": ["^build", "^lint", "^format"]
+      "dependsOn": [
+        "^build",
+        "^lint",
+        "^format"
+      ]
     },
     "check-types": {
-      "dependsOn": ["^build", "^check-types"]
+      "dependsOn": [
+        "^build",
+        "^check-types"
+      ]
     },
     "dev": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "cache": false,
       "persistent": true
     }
