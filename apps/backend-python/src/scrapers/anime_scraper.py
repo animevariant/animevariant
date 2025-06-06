@@ -1,9 +1,11 @@
+import os
 import httpx
 from bs4 import BeautifulSoup
 from typing import List, Dict, Any
 from .base_scraper import BaseScraper
 from pydantic import BaseModel
 from typing import Optional
+from urllib.parse import urlparse
 
 
 class AnimeDetails(BaseModel):
@@ -42,7 +44,7 @@ class AnitakuScraper(BaseScraper):
         url = f"{self.base_url}/category/{anime_id}"
         html = await self.fetch_html(url)
         soup = BeautifulSoup(html, 'html.parser')
-        details = {
+        details = AnimeDetails(**{
             'title': soup.select_one('.anime_info_body_bg h1').text.strip(),
             'image': soup.select_one('.anime_info_body_bg img')['src'],
             'type': '',
@@ -52,7 +54,7 @@ class AnitakuScraper(BaseScraper):
             'genres': '',
             'total_episode': '',
             'other_name': ''
-        }
+        })
         for p in soup.select('p.type'):
             span_text = p.find('span').text
             if span_text == "Type: ":
@@ -175,7 +177,7 @@ class GogoanimeByScraper(BaseScraper):
         for img in soup.select('article'):
             title = img.find('a')['title']
             href = img.find('a')['href']
-            id = href[10:]
+            id = urlparse(href).path.rstrip('/').split('/')[-1]
             image = img.find('img')['src']
             results.append({'title': title, 'id': id, 'image': image})
         return results
@@ -184,7 +186,7 @@ class GogoanimeByScraper(BaseScraper):
         url = f"{self.base_url}/category/{anime_id}"
         html = await self.fetch_html(url)
         soup = BeautifulSoup(html, 'html.parser')
-        details = {
+        details = AnimeDetails(**{
             'title': soup.select_one('.anime_info_body_bg h1').text.strip(),
             'image': soup.select_one('.anime_info_body_bg img')['src'],
             'type': '',
@@ -194,7 +196,7 @@ class GogoanimeByScraper(BaseScraper):
             'genres': '',
             'total_episode': '',
             'other_name': ''
-        }
+        })
         for p in soup.select('p.type'):
             span_text = p.find('span').text
             if span_text == "Type: ":
