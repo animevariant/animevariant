@@ -183,19 +183,19 @@ class GogoanimeByScraper(BaseScraper):
         return results
 
     async def get_details(self, anime_id: str) -> Dict[str, Any]:
-        url = f"{self.base_url}/category/{anime_id}"
+        url = f"{self.base_url}/series/{anime_id}/"
         html = await self.fetch_html(url)
         soup = BeautifulSoup(html, 'html.parser')
         details = AnimeDetails(**{
-            'title': soup.select_one('.anime_info_body_bg h1').text.strip(),
-            'image': soup.select_one('.anime_info_body_bg img')['src'],
-            'type': '',
-            'summary': '',
-            'released': '',
-            'status': '',
-            'genres': '',
-            'total_episode': '',
-            'other_name': ''
+            'title': soup.select_one('.entry-title').text.strip(),
+            'image': soup.select_one('.ts-post-image')['src'],
+            'type': soup.select('.ninfo span')[5].text.strip().split(':')[1],
+            'summary': soup.select_one('.ninfo p').text.strip(),
+            'released': soup.select('.ninfo span')[3].text.strip().split(':')[1],
+            'status': soup.select('.ninfo span')[1].text.strip().split(":")[1],
+            'genres': ",".join([i.text.strip() for i in soup.select('.genxed a')]),
+            'total_episode': str(len(soup.select('.episodes-container a'))),
+            'other_name': soup.select('.ninfo span')[0].text.strip()
         })
         for p in soup.select('p.type'):
             span_text = p.find('span').text
