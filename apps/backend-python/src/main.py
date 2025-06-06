@@ -8,7 +8,7 @@ from .scrapers.manga_scraper import (
     ManganeloScraper, MangaClashScraper, MangaKissScraper, KissMangaScraper, ManhuaTopScraper,
     MangaParkIoScraper, MangaParkNetScraper, ManhuaFastScraper, RMangaScraper, ReadMangaScraper
 )
-from .scrapers.anime_scraper import AnitakuScraper  # Import your anime scraper
+from .scrapers.anime_scraper import AnitakuScraper, GogoanimeByScraper  # Import your anime scraper
 
 from dotenv import load_dotenv
 import httpx
@@ -19,6 +19,7 @@ from bs4 import BeautifulSoup
 from bs4 import BeautifulSoup
 # routes for the API
 from .routers import (router_home)
+from pydantic import BaseModel
 
 load_dotenv()
 
@@ -84,6 +85,18 @@ server_map = {
 
 # Define the server map for anime scrapers and image base URLs
 anime_server_map = {
+    "GOGOANIMEZ_TO": {
+        "scraper": AnitakuScraper,
+        "image_base_urls": [os.getenv("ANITAKU_CDN"), os.getenv("GOGOANIMEZ_TO")]
+    },
+    "GOGOANIME_BY": {
+        "scraper": GogoanimeByScraper,
+        "image_base_urls": [os.getenv("ANITAKU_CDN"), os.getenv("GOGOANIME_BY")]
+    },
+    "GOGOANIME_ORD_VC": {
+        "scraper": AnitakuScraper,
+        "image_base_urls": [os.getenv("ANITAKU_CDN"), os.getenv("GOGOANIME_ORD_VC")]
+    },
     "ANITAKU": {
         "scraper": AnitakuScraper,
         "image_base_urls": [os.getenv("ANITAKU_CDN"), os.getenv("ANITAKU")]
@@ -92,12 +105,13 @@ anime_server_map = {
 
 
 @app.get("/api/anime")
-async def get_anime(server: str = Query(default='ANITAKU'), genre: Optional[str] = None, page: Optional[int] = None):
+async def get_anime(server: str = Query(default='GOGOANIME_BY'), genre: Optional[str] = None, page: Optional[int] = None):
     try:
         if server not in anime_server_map:
             raise HTTPException(status_code=404, detail="Server not found")
 
         base_url = os.getenv(server)
+        print("--"*8, base_url)
         scraper_class = anime_server_map[server]["scraper"]
         scraper = scraper_class(base_url)
         # Use get_popular, adjust method as needed
