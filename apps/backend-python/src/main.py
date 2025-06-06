@@ -122,7 +122,7 @@ async def get_anime(server: str = Query(default='GOGOANIME_BY'), genre: Optional
 
 
 @app.get("/api/anime/{anime_id}")
-async def get_anime_details(server: str = Query(default='ANITAKU'), anime_id: str = Path(..., example="anime-xyz123")):
+async def get_anime_details(server: str = Query(default='GOGOANIME_BY'), anime_id: str = Path(..., example="anime-xyz123")):
     try:
         if server not in anime_server_map:
             raise HTTPException(status_code=404, detail="Server not found")
