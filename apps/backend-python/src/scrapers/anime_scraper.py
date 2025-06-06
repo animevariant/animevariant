@@ -197,25 +197,6 @@ class GogoanimeByScraper(BaseScraper):
             'total_episode': str(len(soup.select('.episodes-container a'))),
             'other_name': soup.select('.ninfo span')[0].text.strip()
         })
-        for p in soup.select('p.type'):
-            span_text = p.find('span').text
-            if span_text == "Type: ":
-                details['type'] = p.text[15:-5].strip()
-            elif span_text == "Plot Summary: ":
-                details['summary'] = p.text[14:].strip()
-            elif span_text == "Released: ":
-                details['released'] = p.text[10:].strip()
-            elif span_text == "Status: ":
-                details['status'] = p.text[8:].strip()
-            elif span_text == "Genre: ":
-                details['genres'] = p.text[20:-4].strip().replace(' ', ',')
-            elif span_text == "Other name: ":
-                details['other_name'] = p.text[12:].strip()
-
-        total_episode_elem = soup.select_one('#episode_page li:last-child a')
-        if total_episode_elem:
-            details['total_episode'] = total_episode_elem.get('ep_end', '')
-
         return details
 
     async def search(self, keyword: str, page: int) -> List[Dict[str, str]]:
