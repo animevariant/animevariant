@@ -2,6 +2,20 @@ import httpx
 from bs4 import BeautifulSoup
 from typing import List, Dict, Any
 from .base_scraper import BaseScraper
+from pydantic import BaseModel
+from typing import Optional
+
+
+class AnimeDetails(BaseModel):
+    title: str
+    image: str
+    type: Optional[str]
+    summary: Optional[str]
+    released: Optional[str]
+    status: Optional[str]
+    genres: Optional[str]
+    total_episode: Optional[str]
+    other_name: Optional[str]
 
 
 class AnitakuScraper(BaseScraper):
