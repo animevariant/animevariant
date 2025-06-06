@@ -152,7 +152,8 @@ class GogoanimeByScraper(BaseScraper):
         html = await self.fetch_html(url)
         soup = BeautifulSoup(html, 'html.parser')
         results = []
-        for img in soup.select('.img'):
+        for img in soup.select('article'):
+            print(img)
             title = img.find('a')['title']
             href = img.find('a')['href']
             id = href[10:]

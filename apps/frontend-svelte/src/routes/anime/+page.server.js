@@ -23,7 +23,7 @@ export const actions = {
     const pageNo = parseInt(data.get('page') || '1');
     try {
       const popularAnimeList = await getPopularAnime(fetch, pageNo);
-	  console.log("-------------->")
+	  console.log("-------------->", popularAnimeList)
       return { popularAnimeList, pageNo };
     } catch (err) {
       console.error('Failed to load anime list:', err);
@@ -34,7 +34,7 @@ export const actions = {
 
 // Function to fetch anime data for a specific page
 async function getPopularAnime(fetch, pageNo) {
-  const url = `${VITE_PUBLIC_API}/api/popular/${pageNo}`;
+  const url = `${VITE_PUBLIC_API}/api/anime?page=${pageNo}`;
   try {
     const response = await fetch(url, {
       headers: { 'Access-Control-Allow-Origin': '*' }
