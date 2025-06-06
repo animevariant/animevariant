@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from typing import List, Dict, Any
 from .base_scraper import BaseScraper
 
+
 class AnitakuScraper(BaseScraper):
     async def fetch_html(self, url: str) -> str:
         async with httpx.AsyncClient() as client:
@@ -78,7 +79,8 @@ class AnitakuScraper(BaseScraper):
         soup = BeautifulSoup(html, 'html.parser')
         links = []
         total_episode = ''
-        link = soup.select_one('li.anime a')['data-video'].replace("streaming.php", "download")
+        link = soup.select_one('li.anime a')[
+            'data-video'].replace("streaming.php", "download")
         total_episode_elem = soup.select_one('#episode_page li:last-child a')
         if total_episode_elem:
             total_episode = total_episode_elem.text.split('-')[-1]
@@ -86,7 +88,8 @@ class AnitakuScraper(BaseScraper):
         download_html = await self.fetch_html(link)
         download_soup = BeautifulSoup(download_html, 'html.parser')
         for a in download_soup.select('a[download=""]'):
-            size = a.text[21:].replace('(', '').replace(')', '').replace(' - mp4', '')
+            size = a.text[21:].replace(
+                '(', '').replace(')', '').replace(' - mp4', '')
             links.append({
                 'src': a['href'],
                 'size': 'High Speed' if size == 'HDP' else size
@@ -115,10 +118,12 @@ class AnitakuScraper(BaseScraper):
             title = img.find('a')['title']
             href = img.find('a')['href']
             image = img.find('img')['src']
-            episode_number = img.find_next_sibling('p', class_='episode').text.strip().replace(" ", "-").lower()
+            episode_number = img.find_next_sibling(
+                'p', class_='episode').text.strip().replace(" ", "-").lower()
             id = href[1:].replace(f"-{episode_number}", "")
             episode_number = episode_number.replace("episode-", "")
-            results.append({'title': title, 'id': id, 'image': image, 'episode_number': episode_number})
+            results.append({'title': title, 'id': id,
+                           'image': image, 'episode_number': episode_number})
         return results
 
     async def get_genre_list(self) -> List[str]:
@@ -128,7 +133,8 @@ class AnitakuScraper(BaseScraper):
         return [li.text for li in soup.select('nav.genre ul li')]
 
     async def get_anime_list(self, variable: str, page: int) -> List[Dict[str, str]]:
-        url = f"{self.base_url}/anime-list.html?page={page}" if variable == "all" else f"{self.base_url}/anime-list-{variable}?page={page}"
+        url = f"{self.base_url}/anime-list.html?page={page}" if variable == "all" else f"{
+            self.base_url}/anime-list-{variable}?page={page}"
         html = await self.fetch_html(url)
         soup = BeautifulSoup(html, 'html.parser')
         results = []
@@ -153,7 +159,6 @@ class GogoanimeByScraper(BaseScraper):
         soup = BeautifulSoup(html, 'html.parser')
         results = []
         for img in soup.select('article'):
-            print(img)
             title = img.find('a')['title']
             href = img.find('a')['href']
             id = href[10:]
@@ -216,7 +221,8 @@ class GogoanimeByScraper(BaseScraper):
         soup = BeautifulSoup(html, 'html.parser')
         links = []
         total_episode = ''
-        link = soup.select_one('li.anime a')['data-video'].replace("streaming.php", "download")
+        link = soup.select_one('li.anime a')[
+            'data-video'].replace("streaming.php", "download")
         total_episode_elem = soup.select_one('#episode_page li:last-child a')
         if total_episode_elem:
             total_episode = total_episode_elem.text.split('-')[-1]
@@ -224,7 +230,8 @@ class GogoanimeByScraper(BaseScraper):
         download_html = await self.fetch_html(link)
         download_soup = BeautifulSoup(download_html, 'html.parser')
         for a in download_soup.select('a[download=""]'):
-            size = a.text[21:].replace('(', '').replace(')', '').replace(' - mp4', '')
+            size = a.text[21:].replace(
+                '(', '').replace(')', '').replace(' - mp4', '')
             links.append({
                 'src': a['href'],
                 'size': 'High Speed' if size == 'HDP' else size
@@ -253,10 +260,12 @@ class GogoanimeByScraper(BaseScraper):
             title = img.find('a')['title']
             href = img.find('a')['href']
             image = img.find('img')['src']
-            episode_number = img.find_next_sibling('p', class_='episode').text.strip().replace(" ", "-").lower()
+            episode_number = img.find_next_sibling(
+                'p', class_='episode').text.strip().replace(" ", "-").lower()
             id = href[1:].replace(f"-{episode_number}", "")
             episode_number = episode_number.replace("episode-", "")
-            results.append({'title': title, 'id': id, 'image': image, 'episode_number': episode_number})
+            results.append({'title': title, 'id': id,
+                           'image': image, 'episode_number': episode_number})
         return results
 
     async def get_genre_list(self) -> List[str]:
@@ -266,7 +275,8 @@ class GogoanimeByScraper(BaseScraper):
         return [li.text for li in soup.select('nav.genre ul li')]
 
     async def get_anime_list(self, variable: str, page: int) -> List[Dict[str, str]]:
-        url = f"{self.base_url}/anime-list.html?page={page}" if variable == "all" else f"{self.base_url}/anime-list-{variable}?page={page}"
+        url = f"{self.base_url}/anime-list.html?page={page}" if variable == "all" else f"{
+            self.base_url}/anime-list-{variable}?page={page}"
         html = await self.fetch_html(url)
         soup = BeautifulSoup(html, 'html.parser')
         results = []

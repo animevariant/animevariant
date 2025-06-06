@@ -8,7 +8,8 @@ from .scrapers.manga_scraper import (
     ManganeloScraper, MangaClashScraper, MangaKissScraper, KissMangaScraper, ManhuaTopScraper,
     MangaParkIoScraper, MangaParkNetScraper, ManhuaFastScraper, RMangaScraper, ReadMangaScraper
 )
-from .scrapers.anime_scraper import AnitakuScraper, GogoanimeByScraper  # Import your anime scraper
+# Import your anime scraper
+from .scrapers.anime_scraper import AnitakuScraper, GogoanimeByScraper
 
 from dotenv import load_dotenv
 import httpx
@@ -111,7 +112,6 @@ async def get_anime(server: str = Query(default='GOGOANIME_BY'), genre: Optional
             raise HTTPException(status_code=404, detail="Server not found")
 
         base_url = os.getenv(server)
-        print("--"*8, base_url)
         scraper_class = anime_server_map[server]["scraper"]
         scraper = scraper_class(base_url)
         # Use get_popular, adjust method as needed
