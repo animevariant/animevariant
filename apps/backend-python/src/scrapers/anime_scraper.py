@@ -216,8 +216,6 @@ class GogoanimeByScraper(BaseScraper):
             id = urlparse(href).path.rstrip('/').split('/')[-1]
             image = img.find('img')['src']
             results.append(Anime(**{'title': title, 'id': id, 'image': image}))
-
-            print(results)
         return results
 
     async def get_watching_links(self, anime_id: str, episode: int) -> Dict[str, Any]:
