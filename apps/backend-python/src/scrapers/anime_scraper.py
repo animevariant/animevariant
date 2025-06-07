@@ -219,14 +219,24 @@ class GogoanimeByScraper(BaseScraper):
         return results
 
     async def get_watching_links(self, anime_id: str, episode: int) -> Dict[str, Any]:
-        url = f"{self.base_url}/{anime_id}-episode-{episode}"
+        url = f"{self.base_url}/series/{anime_id}/"
         html = await self.fetch_html(url)
         soup = BeautifulSoup(html, 'html.parser')
+
+        # go to the details page and get the anime link
+        details_page_episodes = soup.select("div.episode-item a")
+        found_episode_url = next(
+            (i["href"] for i in details_page_episodes if int(i.text.strip().split(" ")[-1]) == episode), None)
+
+        # now i can scrape the episode
+        episode_html = await self.fetch_html(found_episode_url)
+        episode_soup = BeautifulSoup(episode_html, 'html.parser')
+
         links = []
         total_episode = ''
-        link = soup.select_one('li.anime a')[
+        link = episode_soup.select_one('div.episode-item a')[
             'data-video'].replace("streaming.php", "download")
-        total_episode_elem = soup.select_one('#episode_page li:last-child a')
+        total_episode_elem = episode_soup.select_one('#episode_page li:last-child a')
         if total_episode_elem:
             total_episode = total_episode_elem.text.split('-')[-1]
 
