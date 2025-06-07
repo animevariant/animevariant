@@ -29,16 +29,19 @@
 				const { mangas } = response.data;
 				searchResults = mangas;
 			} else if (searchType === 'anime') {
-				response = await axios.get(`${VITE_PUBLIC_API}/api/search/${searchTerm}/1`, {
-					headers: { 'Access-Control-Allow-Origin': '*' }
-				});
+				response = await axios.get(
+					`${VITE_PUBLIC_API}/api/search/anime/?word=${searchTerm}&page=1`,
+					{
+						headers: { 'Access-Control-Allow-Origin': '*' }
+					}
+				);
 				const { results } = response.data;
-				searchResults = results.map(result => ({
+				searchResults = results.map((result) => ({
 					...result,
-					src: result.id,      // Assign `id` to `src`
-					img: result.image    // Assign `image` to `img`
+					src: result.id, // Assign `id` to `src`
+					img: result.image // Assign `image` to `img`
 				}));
-				console.log("re", searchResults)
+				console.log('re', searchResults);
 			}
 		} catch (error) {
 			console.error(error);
@@ -60,13 +63,13 @@
 
 	function handleSearch(event: any) {
 		searchTerm = event.target.value;
-		console.log(searchTerm)
+		console.log(searchTerm);
 		searchQuery.set(searchTerm);
 	}
 
 	// Updated handleClick function to use goto for internal navigation based on searchType
 	function handleClick(id) {
-		console.log(searchResults, id)
+		console.log(searchResults, id);
 		const url = searchType === 'manga' ? id : `/anime/${id}`;
 		window.location = url;
 		searchTerm = '';
@@ -81,7 +84,7 @@
 		if (searchResults.length > 0) {
 			const keywords = searchResults.map((result: any) => result.title).join(', ');
 			metaKeywords.set(keywords);
-			console.log(searchResults)
+			console.log(searchResults);
 		}
 	}
 </script>

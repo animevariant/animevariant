@@ -200,19 +200,20 @@ class GogoanimeByScraper(BaseScraper):
         return details
 
     async def search(self, keyword: str, page: int) -> List[Dict[str, str]]:
-        url = f"{self.base_url}/search.html?keyword={keyword}&page={page}"
+        url = f"{self.base_url}/page/{page}/?s={keyword}"
         html = await self.fetch_html(url)
         soup = BeautifulSoup(html, 'html.parser')
         results = []
-        for img in soup.select('.img'):
+        for img in soup.select('.listupd article'):
             title = img.find('a')['title']
             href = img.find('a')['href']
-            id = href[10:]
+            id = urlparse(href).path.rstrip('/').split('/')[-1] 
             image = img.find('img')['src']
             results.append({'title': title, 'id': id, 'image': image})
         return results
 
     async def get_watching_links(self, anime_id: str, episode: int) -> Dict[str, Any]:
+        print(episode)
         url = f"{self.base_url}/{anime_id}-episode-{episode}"
         html = await self.fetch_html(url)
         soup = BeautifulSoup(html, 'html.parser')

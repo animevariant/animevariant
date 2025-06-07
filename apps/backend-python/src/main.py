@@ -153,7 +153,7 @@ async def get_anime_episode_details(anime_id: str = Path(..., example="anime-xyz
 
 
 @app.get("/api/search/anime")
-async def search_anime(word: str = Query(..., example="naruto"), page: Optional[int] = 1, server: str = Query(default='ANITAKU')):
+async def search_anime(word: str = Query(..., example="naruto"), page: Optional[int] = 1, server: str = Query(default='GOGOANIME_BY')):
     try:
         if server not in anime_server_map:
             raise HTTPException(status_code=404, detail="Server not found")
@@ -162,7 +162,7 @@ async def search_anime(word: str = Query(..., example="naruto"), page: Optional[
         scraper_class = anime_server_map[server]["scraper"]
         scraper = scraper_class(base_url)
         search_results = await scraper.search(word, page)  # Use search
-        return search_results
+        return {"results": search_results}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
