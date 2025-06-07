@@ -1,10 +1,8 @@
-import os
 import httpx
 from bs4 import BeautifulSoup
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union, Optional, Literal
 from .base_scraper import BaseScraper
 from pydantic import BaseModel
-from typing import Optional
 from urllib.parse import urlparse
 
 
@@ -18,6 +16,14 @@ class AnimeDetails(BaseModel):
     genres: Optional[str]
     total_episode: Optional[str]
     other_name: Optional[str]
+
+
+class Anime(BaseModel):
+    title: str
+    id: str
+    image: str
+    episode_number: Union[str, None] = None
+    audio_type: Optional[Literal['dub', 'sub']] = None
 
 
 class AnitakuScraper(BaseScraper):
@@ -37,7 +43,7 @@ class AnitakuScraper(BaseScraper):
             href = img.find('a')['href']
             id = href[10:]
             image = img.find('img')['src']
-            results.append({'title': title, 'id': id, 'image': image})
+            results.append(Anime(**{'title': title, 'id': id, 'image': image}))
         return results
 
     async def get_details(self, anime_id: str) -> Dict[str, Any]:
@@ -86,7 +92,7 @@ class AnitakuScraper(BaseScraper):
             href = img.find('a')['href']
             id = href[10:]
             image = img.find('img')['src']
-            results.append({'title': title, 'id': id, 'image': image})
+            results.append(Anime(**{'title': title, 'id': id, 'image': image}))
         return results
 
     async def get_watching_links(self, anime_id: str, episode: int) -> Dict[str, Any]:
@@ -179,7 +185,7 @@ class GogoanimeByScraper(BaseScraper):
             href = img.find('a')['href']
             id = urlparse(href).path.rstrip('/').split('/')[-1]
             image = img.find('img')['src']
-            results.append({'title': title, 'id': id, 'image': image})
+            results.append(Anime(**{'title': title, 'id': id, 'image': image}))
         return results
 
     async def get_details(self, anime_id: str) -> Dict[str, Any]:
@@ -207,9 +213,11 @@ class GogoanimeByScraper(BaseScraper):
         for img in soup.select('.listupd article'):
             title = img.find('a')['title']
             href = img.find('a')['href']
-            id = urlparse(href).path.rstrip('/').split('/')[-1] 
+            id = urlparse(href).path.rstrip('/').split('/')[-1]
             image = img.find('img')['src']
-            results.append({'title': title, 'id': id, 'image': image})
+            results.append(Anime(**{'title': title, 'id': id, 'image': image}))
+
+            print(results)
         return results
 
     async def get_watching_links(self, anime_id: str, episode: int) -> Dict[str, Any]:
