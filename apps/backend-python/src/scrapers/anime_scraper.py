@@ -219,7 +219,6 @@ class GogoanimeByScraper(BaseScraper):
         return results
 
     async def get_watching_links(self, anime_id: str, episode: int) -> Dict[str, Any]:
-        print(episode)
         url = f"{self.base_url}/{anime_id}-episode-{episode}"
         html = await self.fetch_html(url)
         soup = BeautifulSoup(html, 'html.parser')
