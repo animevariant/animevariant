@@ -29,9 +29,10 @@
 
 
     let servers = [
-		"MANGANELO",
+		// "MANGANELO",
 		// "CHAPMANGANELO",
 		// "MANGACLASH"
+        "RAVENSCANS"
 	];
     let selectedServer;
     const submitFormWithServer = async (server) => {

@@ -45,7 +45,8 @@
 
     let pageNo = 1;
     let servers = [
-        { name: "MANGANELO", active: true },
+        { name: "RAVENSCANS", active: true },
+        { name: "MANGANELO", active: false },
         { name: "MANGACLASH", active: true },
         { name: "MANGAKISS", active: false },
         { name: "KISSMANGA", active: false },

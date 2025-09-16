@@ -4,7 +4,7 @@ let {VITE_PUBLIC_API} = import.meta.env
 
 export const load = async (event) => {
 	const popularMangas = await Popular(event.locals, 1);
-	const latestMangas = await Latest(event, 1, "MANGANELO");
+	const latestMangas = await Latest(event, 1, "RAVENSCANS");
 
 	return {
 		popularMangas,

@@ -111,6 +111,7 @@ async function getInstalledApps() {
 
 
 onMount(async () => {
+	localStorage.setItem('selectedServer', localStorage.getItem('selectedServer') || 'RAVENSCANS');
   detectServiceWorkerUpdate();
   getInstalledApps();
 });

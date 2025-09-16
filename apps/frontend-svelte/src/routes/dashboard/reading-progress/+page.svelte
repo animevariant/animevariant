@@ -40,7 +40,7 @@
 						{#each ( $page.form?.readingProgress ? $page.form?.readingProgress : $page.data.readingProgress) as chapter (chapter.id)}
 							<!-- Manga Card -->
 							<div class="bg-base-300 text-base-content rounded-lg shadow-md">
-								<a href={`/manga/${chapter.expand?.manga?.sourceid}`} class="hover:underline">
+								<a href={`/manga/${chapter.expand?.manga?.sourceid}?server=RAVENSCANS`} class="hover:underline">
 									<!-- Manga Cover Image -->
 									<img
 										src={`${VITE_PUBLIC_API}/api/mangaimage/${chapter.expand?.manga?.img}`}
@@ -49,7 +49,7 @@
 									/>
 								</a>
 								<div class="p-4">
-									<a href={`/manga/${chapter.expand?.manga?.sourceid}`} class="hover:underline">
+									<a href={`/manga/${chapter.expand?.manga?.sourceid}?server=RAVENSCANS`} class="hover:underline">
 										<h5 class="text-lg font-semibold truncate">
 											{chapter.expand?.manga?.title}
 										</h5>

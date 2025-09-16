@@ -217,40 +217,56 @@ class GogoanimeByScraper(BaseScraper):
             image = img.find('img')['src']
             results.append(Anime(**{'title': title, 'id': id, 'image': image}))
         return results
-
     async def get_watching_links(self, anime_id: str, episode: int) -> Dict[str, Any]:
         url = f"{self.base_url}/series/{anime_id}/"
         html = await self.fetch_html(url)
         soup = BeautifulSoup(html, 'html.parser')
-
+        
         # go to the details page and get the anime link
         details_page_episodes = soup.select("div.episode-item a")
         found_episode_url = next(
             (i["href"] for i in details_page_episodes if int(i.text.strip().split(" ")[-1]) == episode), None)
-
+        
         # now i can scrape the episode
         episode_html = await self.fetch_html(found_episode_url)
+        print(found_episode_url)
         episode_soup = BeautifulSoup(episode_html, 'html.parser')
-
         links = []
         total_episode = ''
-        link = episode_soup.select_one('div.episode-item a')[
-            'data-video'].replace("streaming.php", "download")
+        link = ''
+        
+        # Get the main video source from the video tag
+        video_elem = episode_soup.select('.jw-video')
+        print(video_elem)
+        if video_elem and video_elem.get('src'):
+            # Decode HTML entities in the src attribute
+            link = video_elem['src'].replace('&amp;', '&')
+        
+        # Get total episodes
         total_episode_elem = episode_soup.select_one('#episode_page li:last-child a')
         if total_episode_elem:
             total_episode = total_episode_elem.text.split('-')[-1]
-
-        download_html = await self.fetch_html(link)
-        download_soup = BeautifulSoup(download_html, 'html.parser')
-        for a in download_soup.select('a[download=""]'):
-            size = a.text[21:].replace(
-                '(', '').replace(')', '').replace(' - mp4', '')
-            links.append({
-                'src': a['href'],
-                'size': 'High Speed' if size == 'HDP' else size
-            })
-        return {'links': links, 'link': link, 'total_episode': total_episode}
-
+        
+        # Extract alternative server links from the servers section
+        player_links = episode_soup.select('div.servers li.player-type-link')
+        for player in player_links:
+            player_name = player.text.strip()
+            player_type = player.get('data-type', '')
+            encrypted_url1 = player.get('data-encrypted-url1', '')
+            
+            if encrypted_url1:
+                links.append({
+                    'src': encrypted_url1,  # Keep encrypted for now, decode as needed
+                    'size': player_name,
+                    'type': player_type,
+                    'encrypted': True
+                })
+        
+        return {
+            'links': links, 
+            'link': link,  # Direct video source from the video tag
+            'total_episode': total_episode
+        }
     async def get_genre(self, genre: str, page: int) -> List[Dict[str, str]]:
         url = f"{self.base_url}/genre/{genre}?page={page}"
         html = await self.fetch_html(url)

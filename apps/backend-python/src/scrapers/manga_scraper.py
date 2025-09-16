@@ -1,12 +1,13 @@
 from .base_scraper import BaseScraper
-from bs4 import BeautifulSoup
-from typing import List, Optional
-from datetime import datetime
 import re
+from bs4 import BeautifulSoup
+from typing import Optional
+from datetime import datetime
+
 import logging
 import httpx
 from urllib.parse import urlparse, urlunparse
-import re
+
 import os
 
 
@@ -434,3 +435,133 @@ class RMangaScraper(BaseScraper):
 class ReadMangaScraper(BaseScraper):
     # Implement similar to ManganeloScraper
     pass
+
+
+# RavenScans Scraper
+
+
+
+class RavenScansScraper(BaseScraper):
+    def get_chapter_url(self, manga_id: str, chapter_id: str) -> str:
+        # If chapter_id already contains 'chapter', treat as full slug
+        if 'chapter' in chapter_id:
+            return f"{self.base_url}/{chapter_id}/"
+        # fallback: use base implementation
+        return super().get_chapter_url(manga_id, chapter_id)
+
+    async def scrape(self, page: int = 1, genre: str = None, type: str = None):
+        # Scrape manga list from /manga/?page=page
+        url = f"{self.base_url}/manga/?page={page}"
+        html = await self.fetch_html(url)
+        soup = BeautifulSoup(html, 'html.parser')
+        mangas = []
+        # Find all manga links in the list (markdown-style headings)
+        for a in soup.find_all('a', href=re.compile(r"/manga/[^/]+/?$")):
+            title = a.text.strip()
+            src = a['href']
+            manga_id = src.strip('/').split('/')[-1]
+            # Try to find genres and rating in the next siblings
+            genres = []
+            rating = None
+            rating_match = re.search(r"\d+\.\d+", a.parent.text)
+            if rating_match:
+                rating = float(rating_match.group(0))
+            # Genres are links after the title
+            for genre_a in a.parent.find_all('a', href=re.compile(r"/genres/")):
+                genres.append(genre_a.text.strip())
+            mangas.append({
+                "title": title,
+                "img": None,  # No image on list page
+                "latestChapter": None,  # Not available on list page
+                "src": src,
+                "id": manga_id,
+                "genres": genres,
+                "rating": rating,
+                "description": None,
+            })
+        return mangas
+
+    async def get_manga_details(self, manga_id: str):
+        url = f"{self.base_url}/manga/{manga_id}/"
+        html = await self.fetch_html(url)
+        soup = BeautifulSoup(html, 'html.parser')
+        # Title
+        title_tag = soup.find(['h1', 'h2', 'h3'], string=re.compile(manga_id.replace('-', ' '), re.I))
+        title = title_tag.text.strip() if title_tag else manga_id.replace('-', ' ').title()
+        # Cover image
+        img = None
+        img_tag = soup.find('img', src=re.compile(r"/wp-content/uploads/"))
+        if img_tag:
+            img = img_tag['src']
+        # Synopsis
+        synopsis = ""
+        synopsis_tag = soup.find(string=re.compile("Synopsis", re.I))
+        if synopsis_tag:
+            synopsis = synopsis_tag.find_next('p').text.strip() if synopsis_tag.find_next('p') else ""
+        # Genres
+        genres = [a.text.strip() for a in soup.find_all('a', href=re.compile(r"/genres/"))]
+        # Chapters
+        chapters = []
+        for ch_a in soup.find_all('a', href=re.compile(rf"/{manga_id}-chapter-\d+/?$")):
+            chapter_id = ch_a['href'].strip('/').split('/')[-1]
+            chapters.append({
+                "src": ch_a['href'],
+                "chapterId": chapter_id,
+                "chapterTitle": ch_a.text.strip(),
+            })
+        # Rating
+        rating = None
+        rating_match = re.search(r"\d+\.\d+", soup.text)
+        if rating_match:
+            rating = float(rating_match.group(0))
+        return {
+            "title": title,
+            "img": img,
+            "description": synopsis,
+            "genres": genres,
+            "chapters": chapters,
+            "rating": rating,
+        }
+
+    async def get_chapter_details(self, manga_id: str, chapter_id: str):
+        url = self.get_chapter_url(manga_id, chapter_id)
+        html = await self.fetch_html(url)
+        soup = BeautifulSoup(html, 'html.parser')
+        # Title
+        title_tag = soup.find(['h1', 'h2', 'h3'], string=re.compile("chapter", re.I))
+        title = title_tag.text.strip() if title_tag else chapter_id
+        # Images: all <img> in the reader area
+        images = []
+        for img in soup.find_all('img', src=re.compile(r"/wp-content/uploads/")):
+            images.append(img['src'])
+        image_data = [
+            {"imageUrl": url, "pageNumber": idx+1, "totalPages": len(images)}
+            for idx, url in enumerate(images)
+        ]
+        manga = await self.get_manga_details(manga_id)
+        return {
+            "title": title,
+            "images": image_data,
+            "manga": manga
+        }
+
+    async def search_manga(self, word: str, page: int = 1):
+        # Use the search page, similar to scrape but filter by word
+        url = f"{self.base_url}/?s={word}&post_type=wp-manga&page={page}"
+        html = await self.fetch_html(url)
+        soup = BeautifulSoup(html, 'html.parser')
+        search_results = []
+        for a in soup.find_all('a', href=re.compile(r"/manga/[^/]+/?$")):
+            title = a.text.strip()
+            src = a['href']
+            manga_id = src.strip('/').split('/')[-1]
+            search_results.append({
+                "title": title,
+                "img": None,
+                "src": src,
+                "mangaId": manga_id,
+            })
+        return {
+            "page": page,
+            "mangas": search_results
+        }

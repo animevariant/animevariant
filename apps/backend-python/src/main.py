@@ -6,7 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from .scrapers.manga_scraper import (
     ManganeloScraper, MangaClashScraper, MangaKissScraper, KissMangaScraper, ManhuaTopScraper,
-    MangaParkIoScraper, MangaParkNetScraper, ManhuaFastScraper, RMangaScraper, ReadMangaScraper
+    MangaParkIoScraper, MangaParkNetScraper, ManhuaFastScraper, RMangaScraper, ReadMangaScraper,
+    RavenScansScraper
 )
 # Import your anime scraper
 from .scrapers.anime_scraper import AnitakuScraper, GogoanimeByScraper
@@ -80,7 +81,11 @@ server_map = {
     "READMANGA": {
         "scraper": ReadMangaScraper,
         "image_base_urls": [os.getenv("READMANGA_CDN"), os.getenv("READMANGA")]
-    }
+    },
+    "RAVENSCANS": {
+        "scraper": RavenScansScraper,
+        "image_base_urls": [os.getenv("RAVENSCANS_CDN"), os.getenv("RAVENSCANS", "https://ravenscans.com")]
+    },
 }
 
 
@@ -790,7 +795,8 @@ async def get_manga(server: str = Query(default='MANGANELO'), genre: Optional[st
         mangas = await scraper.scrape(genre=genre, page=page, type=type)
         return {"mangas": mangas}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        detail = str(e) or "Unknown error occurred in get_manga endpoint."
+        raise HTTPException(status_code=500, detail=detail)
 
 
 @app.get("/api/manga/{manga_id}")
